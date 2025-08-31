@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>אלפון חכם</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      direction: rtl;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .phone-frame {
+      max-width: 375px;
+      width: 100%; /* Ensure it fills available width */
+      margin: 20px auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 80vh; /* Adjust for better phone-like appearance */
+    }
+
+    .screen {
+      display: none;
+      flex: 1; /* Allow screens to take available height */
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      padding-bottom: 70px; /* Space for bottom nav */
+      overflow-y: auto; /* Enable scrolling for content */
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Enhanced Header */
+    .header {
+      background: linear-gradient(135deg, #1a202c 0%, #2d3748 50%, #1a202c 100%);
+      color: white;
+      padding: 30px 20px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .header h1 {
+      font-size: 22px;
+      margin-bottom: 5px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 1;
+    }
+
+    .back-btn {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 2;
+    }
+
+    .back-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    /* Premium Search Bar */
+    .search-container {
+      padding: 25px;
+      background: transparent;
+      flex-grow: 1; /* Allow search container to grow */
+    }
+
+    .search-bar {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 18px 60px 18px 20px;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      direction: rtl;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.6);
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.2), 0 0 0 3px rgba(102, 126, 234, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #667eea;
+      font-size: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus ~ .search-icon {
+      color: #667eea;
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .mic-icon {
+      position: absolute;
+      left: 55px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #48bb78;
+      cursor: pointer;
+      font-size: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .mic-icon:hover {
+      transform: translateY(-50%) scale(1.2);
+    }
+
+    /* Premium Filter Buttons */
+    .filter-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
+
+    .filter-btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 25px;
+      background: rgba(255, 255, 255, 0.8);
+      color: #667eea;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .filter-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .filter-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Premium Contact Cards */
+    .contact-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .contact-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+
+    .contact-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .contact-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .contact-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .contact-avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 28px;
+      flex-shrink: 0;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .contact-info {
+      flex: 1;
+    }
+
+    .contact-name {
+      font-size: 20px;
+      font-weight: bold;
+      color: #1a202c;
+      margin-bottom: 5px;
+    }
+
+    .contact-phone {
+      color: #667eea;
+      font-size: 16px;
+      margin-bottom: 3px;
+      font-weight: 500;
+    }
+
+    .contact-address {
+      color: #4a5568;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .expand-btn {
+      background: none;
+      border: none;
+      color: #667eea;
+      font-size: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .expand-btn:hover {
+      background: rgba(102, 126, 234, 0.1);
+      transform: scale(1.1);
+    }
+
+    .expand-btn.expanded {
+      transform: rotate(180deg);
+    }
+
+    /* Contact Actions Panel */
+    .contact-actions {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      border-top: 1px solid rgba(102, 126, 234, 0.1);
+      margin-top: 15px;
+    }
+
+    .contact-actions.expanded {
+      max-height: 300px; /* Adjusted for more buttons */
+      padding-top: 15px;
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .action-btn {
+      padding: 15px;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .call-btn {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      color: white;
+      box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+    }
+
+    .whatsapp-btn {
+      background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+      color: white;
+      box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+    }
+
+    .location-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .share-btn {
+      background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+      color: white;
+      box-shadow: 0 5px 15px rgba(237, 137, 54, 0.3);
+    }
+
+    .sms-btn {
+      background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+      color: white;
+      box-shadow: 0 5px 15px rgba(49, 130, 206, 0.3);
+    }
+
+    .save-contact-btn {
+      background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+      color: white;
+      box-shadow: 0 5px 15px rgba(160, 174, 192, 0.3);
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+
+    .contact-details {
+      background: rgba(102, 126, 234, 0.05);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 10px;
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #4a5568;
+    }
+
+    .detail-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .detail-icon {
+      width: 20px;
+      text-align: center;
+      color: #667eea; /* Color for icons in details */
+    }
+
+    /* Screen Navigation (Top right select for demo purposes) */
+    .screen-nav {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    .screen-nav select {
+      padding: 10px 15px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      cursor: pointer;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(102, 126, 234, 0.1);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+      z-index: 999; /* Stay above content */
+      position: sticky; /* Stick to bottom of phone-frame */
+      bottom: 0;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      padding: 8px;
+      color: #4a5568;
+      transition: all 0.3s ease;
+      border-radius: 10px;
+    }
+
+    .nav-item:hover {
+      background: rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .nav-item.active {
+      color: #667eea;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+    }
+
+    .nav-item span {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    /* Results Summary */
+    .results-summary {
+      padding: 0 25px 15px;
+      text-align: center;
+      color: #4a5568;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .results-count {
+      color: #667eea;
+      font-weight: bold;
+    }
+
+    /* Settings Screen Specifics */
+    .settings-content {
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .setting-group {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .setting-group h3 {
+        color: #1a202c;
+        margin-bottom: 15px;
+        font-size: 18px;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding-bottom: 10px;
+    }
+
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      color: #4a5568;
+      font-size: 16px;
+    }
+
+    .setting-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .setting-item label, .setting-item span {
+      flex: 1;
+    }
+
+    .settings-content select, .settings-content input[type="range"] {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e0;
+      background-color: #f8fafc;
+      font-size: 15px;
+      color: #2d3748;
+      transition: all 0.3s ease;
+    }
+
+    .settings-content select:focus, .settings-content input[type="range"]:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+    }
+
+    /* Toggle Switch styles */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 45px; /* Slightly wider */
+      height: 28px; /* Slightly taller */
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 28px; /* Match height for perfect roundness */
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px; /* Smaller than slider height */
+      width: 20px; /* Smaller than slider height */
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #667eea;
+    }
+
+    input:focus + .slider {
+      box-shadow: 0 0 1px #667eea;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(17px); /* Adjust based on new width/height */
+    }
+
+    /* Loading Animation */
+    .loading-dots {
+      display: inline-block;
+      position: relative;
+      width: 80px;
+      height: 20px;
+    }
+
+    .loading-dots div {
+      position: absolute;
+      top: 50%;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #667eea;
+      animation: loading-dots 1.2s linear infinite;
+    }
+
+    .loading-dots div:nth-child(1) { left: 8px; animation-delay: 0s; }
+    .loading-dots div:nth-child(2) { left: 32px; animation-delay: -0.4s; }
+    .loading-dots div:nth-child(3) { left: 56px; animation-delay: -0.8s; }
+
+    @keyframes loading-dots {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 400px) {
+      .phone-frame {
+        margin: 10px;
+        max-width: calc(100% - 20px);
+      }
+      
+      .bottom-nav {
+        width: calc(100% - 20px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen-nav">
+      <select onchange="changeScreen(this.value)">
+        <option value="home">בית</option>
+        <option value="search">חיפוש</option>
+        <option value="favorites">מועדפים</option>
+        <option value="settings">הגדרות</option>
+      </select>
+    </div>
+
+    <div class="screen active" id="home">
+      <div class="header"><h1>אלפון חכם</h1></div>
+      <div class="search-container">
+        <p style="text-align:center;color:#4a5568; margin-top: 50px; font-size: 18px;">ברוך הבא לאלפון החכם!</p>
+        <p style="text-align:center;color:#4a5568; margin-top: 10px; font-size: 15px;">כאן תוכל לנהל את אנשי הקשר שלך בקלות וביעילות.</p>
+        <div style="text-align:center; margin-top: 30px;">
+            <button class="filter-btn" onclick="changeScreen('search')" style="padding: 15px 30px; font-size: 16px;">
+                <i class="fas fa-search"></i> התחל חיפוש
+            </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="search">
+      <div class="header"><h1>חיפוש אנשי קשר</h1></div>
+      <div class="search-container">
+        <div class="search-bar">
+          <input type="text" class="search-input" placeholder="הכנס שם או מספר לחיפוש..." id="searchInput">
+          <i class="fas fa-search search-icon"></i>
+          <i class="fas fa-microphone mic-icon"></i>
+        </div>
+        <button onclick="runSearch()" class="filter-btn" style="width: 100%; margin-bottom: 20px;">בצע חיפוש</button>
+
+        <div id="searchResults"></div>
+      </div>
+    </div>
+
+    <div class="screen" id="favorites">
+      <div class="header"><h1>מועדפים</h1></div>
+      <div class="search-container">
+        <p style="text-align:center;color:#4a5568">רשימת המועדפים שלך תופיע כאן.</p>
+        <p style="text-align:center;color:#4a5568; font-size: 14px; margin-top: 10px;">לחץ על <i class="fas fa-star"></i> בכרטיס איש קשר כדי להוסיף למועדפים.</p>
+      </div>
+    </div>
+
+    <div class="screen" id="settings">
+      <div class="header"><h1>הגדרות האפליקציה</h1></div>
+      <div class="settings-content">
+        <div class="setting-group">
+            <h3>הגדרות תצוגה</h3>
+            <div class="setting-item">
+                <label for="themeSelect">מצב תצוגה:</label>
+                <select id="themeSelect" onchange="updateTheme()">
+                  <option value="light">בהיר</option>
+                  <option value="dark">כהה</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <label for="fontSizeSlider">גודל טקסט:</label>
+                <input type="range" id="fontSizeSlider" min="14" max="20" value="16" oninput="updateFontSize(this.value)">
+            </div>
+        </div>
+
+        <div class="setting-group">
+            <h3>הגדרות תקשורת</h3>
+            <div class="setting-item">
+                <span>זיהוי שיחות נכנסות:</span>
+                <label class="switch">
+                    <input type="checkbox" id="callerIdToggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <span>הצגת מיקום שולח הודעה:</span>
+                <label class="switch">
+                    <input type="checkbox" id="locationToggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="setting-group">
+            <h3>כללי</h3>
+            <div class="setting-item">
+                <button class="filter-btn" style="width: 100%; background: #e53e3e; color: white; box-shadow: 0 5px 15px rgba(229,62,62,0.3);">
+                    <i class="fas fa-trash-alt"></i> נקה נתוני אפליקציה
+                </button>
+            </div>
+            <div class="setting-item">
+                <button class="filter-btn" style="width: 100%; background: #38b2ac; color: white; box-shadow: 0 5px 15px rgba(56,178,172,0.3);">
+                    <i class="fas fa-info-circle"></i> אודות האפליקציה
+                </button>
+            </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item active" onclick="changeScreen('home')">
+        <i class="fas fa-home"></i><span>בית</span>
+      </div>
+      <div class="nav-item" onclick="changeScreen('search')">
+        <i class="fas fa-search"></i><span>חיפוש</span>
+      </div>
+      <div class="nav-item" onclick="changeScreen('favorites')">
+        <i class="fas fa-star"></i><span>מועדפים</span>
+      </div>
+      <div class="nav-item" onclick="changeScreen('settings')">
+        <i class="fas fa-cog"></i><span>הגדרות</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const contacts = [
+      { name: 'משה', family: 'כהן', phone: '0501234567', address: 'ירושלים, רחוב הרא"ה 10' },
+      { name: 'יעקב', family: 'לוי', phone: '0527654321', address: 'בני ברק, רחוב רבי עקיבא 50' },
+      { name: 'דוד', family: 'פרידמן', phone: '0539876543', address: 'ירושלים, רחוב הרב קוק 7' },
+      { name: 'שרה', family: 'ישראל', phone: '0541122334', address: 'חיפה, דרך הים 1' },
+      { name: 'יוסף', family: 'שמעוני', phone: '0585566778', address: 'אשדוד, שדרות ירושלים 25' },
+    ];
+
+    function changeScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      document.querySelector(`.nav-item[onclick="changeScreen('${id}')"]`).classList.add('active');
+      
+      document.querySelector('.screen-nav select').value = id;
+    }
+
+    function runSearch() {
+      const input = document.getElementById('searchInput').value.trim().toLowerCase();
+      const resultsContainer = document.getElementById('searchResults');
+      resultsContainer.innerHTML = '';
+
+      const matched = contacts.filter(c => 
+        (`${c.name} ${c.family}`).toLowerCase().includes(input) || 
+        (`${c.family} ${c.name}`).toLowerCase().includes(input) ||
+        c.phone.includes(input)
+      );
+
+      if (matched.length === 0) {
+        resultsContainer.innerHTML = '<p style="text-align:center;color:#4a5568; margin-top: 20px;">לא נמצאו תוצאות עבור החיפוש שלך.</p>';
+        return;
+      }
+
+      resultsContainer.innerHTML = `<p class="results-summary">נמצאו <span class="results-count">${matched.length}</span> אנשי קשר:</p>`;
+
+      matched.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'contact-card';
+        div.innerHTML = `
+          <div class="contact-header">
+            <div class="contact-avatar">${c.name.charAt(0)}</div>
+            <div class="contact-info">
+              <div class="contact-name">${c.name} ${c.family}</div>
+              <div class="contact-phone"><a href="tel:${c.phone}">${c.phone}</a></div>
+              <div class="contact-address">${c.address}</div>
+            </div>
+            <button class="expand-btn" onclick="toggleExpand(this)"><i class="fas fa-chevron-down"></i></button>
+          </div>
+          <div class="contact-actions">
+            <div class="actions-grid">
+              <button class="action-btn call-btn" onclick="makeCall('${c.phone}')">
+                <i class="fas fa-phone"></i> התקשר
+              </button>
+              <button class="action-btn whatsapp-btn" onclick="openWhatsapp('${c.phone}')">
+                <i class="fab fa-whatsapp"></i> WhatsApp
+              </button>
+              <button class="action-btn sms-btn" onclick="sendSms('${c.phone}')">
+                <i class="fas fa-sms"></i> שלח SMS
+              </button>
+              <button class="action-btn location-btn" onclick="openLocation('${c.address}')">
+                <i class="fas fa-map-marker-alt"></i> מיקום
+              </button>
+              <button class="action-btn save-contact-btn" onclick="saveContact('${c.name}', '${c.family}', '${c.phone}', '${c.address}')">
+                <i class="fas fa-user-plus"></i> שמור איש קשר
+              </button>
+              <button class="action-btn share-btn" onclick="shareContact('${c.name} ${c.family}', '${c.phone}', '${c.address}')">
+                <i class="fas fa-share-alt"></i> שתף
+              </button>
+            </div>
+            <div class="contact-details">
+              <div class="detail-item"><span class="detail-icon"><i class="fas fa-clock"></i></span> סטטוס: נמצא כרגע פנוי</div>
+              <div class="detail-item"><span class="detail-icon"><i class="fas fa-calendar-alt"></i></span> עודכן לאחרונה: היום</div>
+            </div>
+          </div>
+        `;
+        resultsContainer.appendChild(div);
+      });
+    }
+
+    function toggleExpand(btn) {
+      const card = btn.closest('.contact-card');
+      const actions = card.querySelector('.contact-actions');
+      actions.classList.toggle('expanded');
+      btn.classList.toggle('expanded');
+    }
+
+    function makeCall(num) {
+      alert('מדמה חיוג למספר: ' + num);
+      // window.location.href = 'tel:' + num; // Uncomment for actual phone action
+    }
+
+    function openWhatsapp(num) {
+      alert('מדמה פתיחת שיחת וואטסאפ עם: ' + num);
+      // window.open('https://wa.me/' + num, '_blank'); // Uncomment for actual WhatsApp action
+    }
+
+    function sendSms(num) {
+      alert('מדמה שליחת הודעת SMS למספר: ' + num);
+      // window.location.href = 'sms:' + num; // Uncomment for actual SMS action
+    }
+
+    function openLocation(address) {
+        alert('מדמה פתיחת מיקום עבור: ' + address);
+        // window.open(`https://maps.google.com/?q=${encodeURIComponent(address)}`, '_blank'); // Uncomment for actual map action
+    }
+
+    function saveContact(name, family, phone, address) {
+        alert(`מדמה שמירת איש קשר: ${name} ${family}, ${phone}, ${address}`);
+        // In a real app, this would trigger native contact saving functionality.
+    }
+
+    function shareContact(name, phone, address) {
+        const textToShare = `איש קשר: ${name}\nטלפון: ${phone}\nכתובת: ${address}`;
+        alert('מדמה שיתוף מידע: ' + textToShare);
+        /*
+        if (navigator.share) {
+            navigator.share({
+                title: 'פרטי איש קשר',
+                text: textToShare,
+            }).then(() => console.log('Shared successfully'))
+              .catch((error) => console.log('Error sharing', error));
+        } else {
+            alert('שיתוף אינו נתמך בדפדפן זה.');
+        }
+        */
+    }
+
+    function updateTheme() {
+      const theme = document.getElementById('themeSelect').value;
+      const body = document.body;
+      const phoneFrame = document.querySelector('.phone-frame');
+      const header = document.querySelector('.header');
+      const contactCards = document.querySelectorAll('.contact-card');
+      const searchInput = document.querySelector('.search-input');
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      const bottomNav = document.querySelector('.bottom-nav');
+      const settingsGroups = document.querySelectorAll('.setting-group');
+
+      if (theme === 'dark') {
+        body.style.background = '#2d3748';
+        phoneFrame.style.background = 'rgba(45, 55, 72, 0.95)';
+        header.style.background = 'linear-gradient(135deg, #1a202c 0%, #2d3748 100%)';
+        searchInput.style.background = 'rgba(64, 78, 103, 0.9)';
+        searchInput.style.color = 'white';
+        bottomNav.style.background = 'rgba(45, 55, 72, 0.9)';
+        
+        contactCards.forEach(card => {
+            card.style.background = 'rgba(64, 78, 103, 0.9)';
+            card.style.borderColor = 'rgba(255,255,255,0.1)';
+            card.querySelector('.contact-name').style.color = 'white';
+            card.querySelector('.contact-phone').style.color = '#90cdf4';
+            card.querySelector('.contact-address').style.color = '#a0aec0';
+        });
+
+        filterBtns.forEach(btn => {
+            if (!btn.classList.contains('active')) {
+                btn.style.background = 'rgba(64, 78, 103, 0.8)';
+                btn.style.color = '#a0aec0';
+            }
+        });
+        
+        settingsGroups.forEach(group => {
+            group.style.background = 'rgba(64, 78, 103, 0.8)';
+            group.style.borderColor = 'rgba(255,255,255,0.1)';
+            group.querySelector('h3').style.color = 'white';
+            group.querySelectorAll('.setting-item').forEach(item => item.style.color = '#a0aec0');
+        });
+
+      } else {
+        body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        phoneFrame.style.background = 'rgba(255, 255, 255, 0.95)';
+        header.style.background = 'linear-gradient(135deg, #1a202c 0%, #2d3748 50%, #1a202c 100%)';
+        searchInput.style.background = 'rgba(255, 255, 255, 0.9)';
+        searchInput.style.color = '#1a202c';
+        bottomNav.style.background = 'rgba(255, 255, 255, 0.9)';
+
+        contactCards.forEach(card => {
+            card.style.background = 'rgba(255, 255, 255, 0.9)';
+            card.style.borderColor = 'rgba(255,255,255,0.2)';
+            card.querySelector('.contact-name').style.color = '#1a202c';
+            card.querySelector('.contact-phone').style.color = '#667eea';
+            card.querySelector('.contact-address').style.color = '#4a5568';
+        });
+
+        filterBtns.forEach(btn => {
+            if (!btn.classList.contains('active')) {
+                btn.style.background = 'rgba(255, 255, 255, 0.8)';
+                btn.style.color = '#667eea';
+            }
+        });
+
+        settingsGroups.forEach(group => {
+            group.style.background = 'rgba(255, 255, 255, 0.8)';
+            group.style.borderColor = 'rgba(255,255,255,0.2)';
+            group.querySelector('h3').style.color = '#1a202c';
+            group.querySelectorAll('.setting-item').forEach(item => item.style.color = '#4a5568');
+        });
+      }
+    }
+
+    function updateFontSize(size) {
+      document.body.style.fontSize = size + 'px';
+      document.querySelectorAll('.contact-name').forEach(el => el.style.fontSize = (parseInt(size) + 4) + 'px');
+      document.querySelectorAll('.contact-phone').forEach(el => el.style.fontSize = (parseInt(size) + 0) + 'px');
+      document.querySelectorAll('.contact-address').forEach(el => el.style.fontSize = (parseInt(size) - 2) + 'px');
+      document.querySelectorAll('.action-btn').forEach(el => el.style.fontSize = (parseInt(size) - 2) + 'px');
+      document.querySelectorAll('.detail-item').forEach(el => el.style.fontSize = (parseInt(size) - 2) + 'px');
+      document.querySelectorAll('.nav-item span').forEach(el => el.style.fontSize = (parseInt(size) - 4) + 'px');
+    }
+
+    // Initial load, run a search to show contacts
+    document.addEventListener('DOMContentLoaded', () => {
+        changeScreen('home'); // Start on home screen
+        // Optionally runSearch() on load for initial display of contacts on search screen
+    });
+  </script>
+</body>
+</html>
